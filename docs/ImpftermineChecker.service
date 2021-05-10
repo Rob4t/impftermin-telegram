@@ -3,7 +3,7 @@ Description=Checkt auf Impftermine
 
 [Service]
 Type=simple
-ExecStart=impftermin-telegram
+ExecStart=/home/pi/go/bin/impftermin-telegram
 
 [Install]
 WantedBy=basic.target
