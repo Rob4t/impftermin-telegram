@@ -1,4 +1,4 @@
-module grande.sh/yolo
+module github.com/Rob4t/impftermin-telegram
 
 go 1.16
 
