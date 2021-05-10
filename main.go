@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -14,7 +15,8 @@ var config = []notifyConfig{
 }
 
 const (
-	url = "https://www.impfportal-niedersachsen.de"
+	url          = "https://www.impfportal-niedersachsen.de"
+	captchaRegex = "<title>[^<>]*Captcha[^<>]*</title>"
 )
 
 type (
@@ -63,7 +65,12 @@ func handleConfig(cfg notifyConfig) {
 		Get(fmt.Sprintf("appointments/findVaccinationCenterListFree/%s?stiko=%s&birthdate=%d", cfg.PLZ, cfg.STIKO, ms))
 	result, ok := resp.Result().(*listResponse)
 	if !ok {
-		log.Fatal("couldnt read answer")
+		b.Send(&tb.User{ID: cfg.UserID}, fmt.Sprintf("Impftermin Script: Couldnt read answer!"))
+		return
+	}
+	re := regexp.MustCompile(captchaRegex)
+	if re.Match(resp.Body()) {
+		b.Send(&tb.User{ID: cfg.UserID}, fmt.Sprintf("Impftermin Script: Captcha!"))
 		return
 	}
 	for _, res := range result.ResultList {
