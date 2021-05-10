@@ -67,7 +67,7 @@ func handleConfig(cfg notifyConfig) {
 		return
 	}
 	for _, res := range result.ResultList {
-		if res.OutOfStock {
+		if !res.OutOfStock {
 			b.Send(&tb.User{ID: cfg.UserID}, fmt.Sprintf("Impftermine!\n%s\n\nImpfstoff: %s\nImpfzentrum: %s\nSTIKO: %s\nGeburtstag: %s", url, res.VaccineName, res.Name, cfg.STIKO, cfg.Birthdate))
 		}
 	}
