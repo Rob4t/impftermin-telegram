@@ -1,0 +1,9 @@
+[Unit]
+Description=Checkt auf Impftermine
+
+[Service]
+Type=simple
+ExecStart=impftermin-telegram
+
+[Install]
+WantedBy=basic.target

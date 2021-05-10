@@ -1,0 +1,10 @@
+[Unit]
+Description=Impfchecker Timer
+
+[Timer]
+OnCalendar=*:0/30
+Persistent=true
+Unit=ImpftermineChecker.service
+
+[Install]
+WantedBy=basic.target
