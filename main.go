@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -12,21 +13,25 @@ import (
 )
 
 var config = []notifyConfig{
-	// {BotToken: "TOKEN", UserID: 123456789, PLZ: "12345", STIKO: "M", Birthdate: "1999-01-01"},
+	// {BotToken: "TOKEN", ChatIDs: []int64{123456}, ErrorChatIDs: []int64{123456}, PLZ: "12345", STIKO: "M", Birthdate: "1999-01-01"},
 }
 
 const (
-	url          = "https://www.impfportal-niedersachsen.de"
-	captchaRegex = "<title>[^<>]*Captcha[^<>]*</title>"
+	url           = "https://www.impfportal-niedersachsen.de"
+	captchaRegex  = "<title>[^<>]*Captcha[^<>]*</title>"
+	foundText     = "Impftermine!\n{PortalUrl}\n\nImpfstoff: {VaccineName}\nImpfzentrum: {VaccineCenter}\nSTIKO: {STIKO}\nGeburtstag: {Birthdate}"
+	errReadAnswer = "Impftermin Script: Couldnt read answer!"
+	errCaptcha    = "Impftermin Script: Captcha!"
 )
 
 type (
 	notifyConfig struct {
-		BotToken  string
-		UserID    int
-		PLZ       string
-		STIKO     string
-		Birthdate string
+		BotToken     string
+		ChatIDs      []int64
+		ErrorChatIDs []int64
+		PLZ          string
+		STIKO        string
+		Birthdate    string
 	}
 	response struct {
 		Name        string `json:"name"`
@@ -38,6 +43,24 @@ type (
 		ResultList []response `json:"resultList"`
 	}
 )
+
+func replaceText(text string, cfg notifyConfig, res *response) string {
+	replStrings := []string{
+		"{PortalUrl}", url,
+		"{STIKO}", cfg.STIKO,
+		"{Birthdate}", cfg.Birthdate,
+		"{PLZ}", cfg.PLZ,
+	}
+	if res != nil {
+		replStrings = append(replStrings, []string{
+			"{VaccineName}", res.VaccineName,
+			"{VaccineCenter}", res.Name,
+			"{OutOfStock}", fmt.Sprint(res.OutOfStock),
+		}...)
+	}
+	r := strings.NewReplacer(replStrings...)
+	return r.Replace(text)
+}
 
 func handleConfig(cfg notifyConfig) {
 	b, err := tb.NewBot(tb.Settings{
@@ -71,17 +94,23 @@ func handleConfig(cfg notifyConfig) {
 		Get(fmt.Sprintf("appointments/findVaccinationCenterListFree/%s?stiko=%s&birthdate=%d", cfg.PLZ, cfg.STIKO, ms))
 	result, ok := resp.Result().(*listResponse)
 	if !ok {
-		b.Send(&tb.User{ID: cfg.UserID}, fmt.Sprintf("Impftermin Script: Couldnt read answer!"))
+		for _, cid := range cfg.ErrorChatIDs {
+			b.Send(&tb.Chat{ID: cid}, replaceText(errReadAnswer, cfg, nil))
+		}
 		return
 	}
 	re := regexp.MustCompile(captchaRegex)
 	if re.Match(resp.Body()) {
-		b.Send(&tb.User{ID: cfg.UserID}, fmt.Sprintf("Impftermin Script: Captcha!"))
+		for _, cid := range cfg.ErrorChatIDs {
+			b.Send(&tb.Chat{ID: cid}, replaceText(errCaptcha, cfg, nil))
+		}
 		return
 	}
 	for _, res := range result.ResultList {
 		if !res.OutOfStock {
-			b.Send(&tb.User{ID: cfg.UserID}, fmt.Sprintf("Impftermine!\n%s\n\nImpfstoff: %s\nImpfzentrum: %s\nSTIKO: %s\nGeburtstag: %s", url, res.VaccineName, res.Name, cfg.STIKO, cfg.Birthdate))
+			for _, cid := range cfg.ChatIDs {
+				b.Send(&tb.Chat{ID: cid}, replaceText(foundText, cfg, &res))
+			}
 		}
 	}
 }
