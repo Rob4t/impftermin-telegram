@@ -19,9 +19,9 @@ var config = []notifyConfig{
 const (
 	url           = "https://www.impfportal-niedersachsen.de"
 	captchaRegex  = "<title>[^<>]*Captcha[^<>]*</title>"
-	foundText     = "Impftermine!\n{PortalUrl}\n\nImpfstoff: {VaccineName}\nImpfzentrum: {VaccineCenter}\nSTIKO: {STIKO}\nGeburtstag: {Birthdate}"
-	errReadAnswer = "Impftermin Script: Couldnt read answer!"
-	errCaptcha    = "Impftermin Script: Captcha!"
+	foundText     = "❗Impftermine❗\n{PortalUrl}\n\nImpfstoff: {VaccineName}\nImpfzentrum: {VaccineCenter}\nSTIKO: {STIKO}\nGeburtstag: {Birthdate}"
+	errReadAnswer = "❌ Impftermin Script: Couldnt read answer!"
+	errCaptcha    = "❌ Impftermin Script: Captcha!"
 )
 
 type (
