@@ -87,7 +87,8 @@ func handleConfig(cfg notifyConfig) {
 	// Create a Resty Client
 	client := resty.New()
 	client.SetHostURL(url+"/portal/rest/").
-		SetHeader("Accept", "application/json")
+		SetHeader("Accept", "application/json").
+		SetHeader("User-Agent", "User-Agent: Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0")
 
 	resp, err := client.R().
 		SetResult(&listResponse{}).
