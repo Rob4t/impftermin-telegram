@@ -9,18 +9,16 @@ cd impftermin-telegram
 
 go install .
 
-mkdir -p ~/.config/systemd/user
-
-cp docs/* ~/.config/systemd/user/
+cp docs/* /etc/systemd/system/
 
 cd ~/.config/systemd/user/
 
-# edit ~/.config/systemd/user/ImpftermineChecker.service to match your go bin path in execstart
+# edit /etc/systemd/system/ImpftermineChecker.service to match your go bin path in execstart
 
-systemctl --user enable ~/.config/systemd/user/ImpftermineChecker.service
+systemctl enable /etc/systemd/systen/ImpftermineChecker.service
 
-systemctl --user enable ~/.config/systemd/user/ImpftermineChecker.timer
+systemctl enable /etc/systemd/systen/ImpftermineChecker.timer
 
-systemctl --user start ~/.config/systemd/user/ImpftermineChecker.service
+systemctl start /etc/systemd/system/ImpftermineChecker.service
 
-systemctl --user start ~/.config/systemd/user/ImpftermineChecker.timer
+systemctl start /etc/systemd/system/ImpftermineChecker.timer
