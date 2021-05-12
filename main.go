@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -68,13 +67,13 @@ func handleConfig(cfg notifyConfig) {
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 
 	t, err := time.Parse("2006-01-02", cfg.Birthdate)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 	ms := t.UnixNano() / 1000000
