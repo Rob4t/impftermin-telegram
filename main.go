@@ -95,6 +95,7 @@ func handleConfig(cfg notifyConfig) {
 		Get(fmt.Sprintf("appointments/findVaccinationCenterListFree/%s?stiko=%s&birthdate=%d", cfg.PLZ, cfg.STIKO, ms))
 	result, ok := resp.Result().(*listResponse)
 	if !ok {
+		fmt.Println(replaceText(errReadAnswer, cfg, nil))
 		for _, cid := range cfg.ErrorChatIDs {
 			b.Send(&tb.Chat{ID: cid}, replaceText(errReadAnswer, cfg, nil))
 		}
@@ -102,10 +103,13 @@ func handleConfig(cfg notifyConfig) {
 	}
 	re := regexp.MustCompile(captchaRegex)
 	if re.Match(resp.Body()) {
+		fmt.Println(replaceText(errCaptcha, cfg, nil))
 		for _, cid := range cfg.ErrorChatIDs {
-			b.Send(&tb.Chat{ID: cid}, replaceText(errCaptcha, cfg, nil))
+			b.Send(&tb.Chat{ID: cid}, replaceText(errCaptcha+"\nRequest: "+fmt.Sprint(resp.Request.Time)+"\nResponse: "+fmt.Sprint(resp.Time()), cfg, nil))
 		}
 		return
+	} else {
+		fmt.Println("got response list len: " + fmt.Sprint(len(result.ResultList)))
 	}
 	for _, res := range result.ResultList {
 		if !res.OutOfStock {
