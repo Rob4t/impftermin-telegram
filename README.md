@@ -11,8 +11,6 @@ go install .
 
 cp docs/* /etc/systemd/system/
 
-cd ~/.config/systemd/user/
-
 # edit /etc/systemd/system/ImpftermineChecker.service to match your go bin path in execstart
 
 systemctl enable /etc/systemd/systen/ImpftermineChecker.service
