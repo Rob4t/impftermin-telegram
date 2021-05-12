@@ -79,9 +79,9 @@ func handleConfig(cfg notifyConfig) {
 	}
 	ms := t.UnixNano() / 1000000
 
-	// wait between 1 and 10 seconds
+	// wait between 1 and 45 seconds
 	rand.Seed(time.Now().UnixNano())
-	waitSec := rand.Intn(10) + 1
+	waitSec := rand.Intn(45) + 1
 	time.Sleep(time.Duration(waitSec) * time.Second)
 
 	// Create a Resty Client
