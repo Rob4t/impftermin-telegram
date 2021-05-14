@@ -13,10 +13,10 @@ cp docs/* /etc/systemd/system/
 
 # edit /etc/systemd/system/ImpftermineChecker.service to match your go bin path in execstart
 
-systemctl enable /etc/systemd/system/ImpftermineChecker.service
+sudo systemctl enable ImpftermineChecker.service
 
-systemctl enable /etc/systemd/system/ImpftermineChecker.timer
+sudo systemctl enable ImpftermineChecker.timer
 
-systemctl start /etc/systemd/system/ImpftermineChecker.service
+sudo systemctl start ImpftermineChecker.service
 
-systemctl start /etc/systemd/system/ImpftermineChecker.timer
+sudo systemctl start ImpftermineChecker.timer
