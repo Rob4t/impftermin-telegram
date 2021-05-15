@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -19,8 +20,9 @@ const (
 	url           = "https://www.impfportal-niedersachsen.de"
 	captchaRegex  = "<title>[^<>]*Captcha[^<>]*</title>"
 	foundText     = "❗Impftermine❗\n{PortalUrl}\n\nImpfstoff: {VaccineName}\nImpfzentrum: {VaccineCenter}\nSTIKO: {STIKO}\nGeburtstag: {Birthdate}"
-	errReadAnswer = "❌ Impftermin Script: Couldnt read answer!"
-	errCaptcha    = "❌ Impftermin Script: Captcha!"
+	requestInfos  = "Birthdate: {Birthdate}\nPLZ: {PLZ}\nSTIKO: {STIKO}"
+	errReadAnswer = "❌ Impftermin Script: Couldnt read answer!\n" + requestInfos
+	errCaptcha    = "❌ Impftermin Script: Captcha!\n" + requestInfos
 )
 
 type (
@@ -61,7 +63,8 @@ func replaceText(text string, cfg notifyConfig, res *response) string {
 	return r.Replace(text)
 }
 
-func handleConfig(cfg notifyConfig) {
+func handleConfig(cfg notifyConfig, success chan bool) {
+	defer func() { success <- false }()
 	b, err := tb.NewBot(tb.Settings{
 		Token: cfg.BotToken,
 	})
@@ -108,7 +111,7 @@ func handleConfig(cfg notifyConfig) {
 		}
 		return
 	} else {
-		fmt.Println("got response list len: " + fmt.Sprint(len(result.ResultList)))
+		fmt.Println(replaceText("got response list len: "+fmt.Sprint(len(result.ResultList))+" {Birthdate}", cfg, nil))
 	}
 	for _, res := range result.ResultList {
 		if !res.OutOfStock {
@@ -117,10 +120,20 @@ func handleConfig(cfg notifyConfig) {
 			}
 		}
 	}
+	success <- true
 }
 
 func main() {
-	for _, c := range config {
-		handleConfig(c)
+	var chans []chan bool
+	for i, c := range config {
+		chans = append(chans, make(chan bool))
+		go handleConfig(c, chans[i])
 	}
+	exit := 0
+	for _, ch := range chans {
+		if res := <-ch; !res {
+			exit = 1
+		}
+	}
+	os.Exit(exit)
 }
