@@ -63,8 +63,8 @@ func replaceText(text string, cfg notifyConfig, res *response) string {
 	return r.Replace(text)
 }
 
-func handleConfig(cfg notifyConfig, success chan bool) {
-	defer func() { success <- false }()
+func handleConfig(cfg notifyConfig, success chan bool) (res bool) {
+	defer func() { success <- res }()
 	b, err := tb.NewBot(tb.Settings{
 		Token: cfg.BotToken,
 	})
@@ -120,7 +120,8 @@ func handleConfig(cfg notifyConfig, success chan bool) {
 			}
 		}
 	}
-	success <- true
+	res = true
+	return
 }
 
 func main() {
