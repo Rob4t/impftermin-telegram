@@ -21,8 +21,10 @@ const (
 	captchaRegex  = "<title>[^<>]*Captcha[^<>]*</title>"
 	foundText     = "❗Impftermine❗\n{PortalUrl}\n\nImpfstoff: {VaccineName}\nImpfzentrum: {VaccineCenter}\nSTIKO: {STIKO}\nGeburtstag: {Birthdate}"
 	requestInfos  = "Birthdate: {Birthdate}\nPLZ: {PLZ}\nSTIKO: {STIKO}"
+	errStatus     = "❌ Impftermin Script: Invalid http status!"
 	errReadAnswer = "❌ Impftermin Script: Couldnt read answer!\n" + requestInfos
 	errCaptcha    = "❌ Impftermin Script: Captcha!\n" + requestInfos
+	errResultLen  = "❌ Impftermin Script: Result list empty!\n" + requestInfos
 )
 
 type (
@@ -34,6 +36,10 @@ type (
 		STIKO        string
 		Birthdate    string
 	}
+	notifyExecutor struct {
+		bot *tb.Bot
+		cfg notifyConfig
+	}
 	response struct {
 		Name        string `json:"name"`
 		VaccineName string `json:"vaccineName"`
@@ -44,6 +50,16 @@ type (
 		ResultList []response `json:"resultList"`
 	}
 )
+
+func newExecutor(cfg notifyConfig) (ne *notifyExecutor, err error) {
+	ne = &notifyExecutor{
+		cfg: cfg,
+	}
+	ne.bot, err = tb.NewBot(tb.Settings{
+		Token: cfg.BotToken,
+	})
+	return
+}
 
 func replaceText(text string, cfg notifyConfig, res *response) string {
 	replStrings := []string{
@@ -63,18 +79,17 @@ func replaceText(text string, cfg notifyConfig, res *response) string {
 	return r.Replace(text)
 }
 
-func handleConfig(cfg notifyConfig, success chan bool) (res bool) {
-	defer func() { success <- res }()
-	b, err := tb.NewBot(tb.Settings{
-		Token: cfg.BotToken,
-	})
-
-	if err != nil {
-		fmt.Println(err)
-		return
+func (ne *notifyExecutor) errorOut(msg string) {
+	fmt.Println(msg)
+	for _, cid := range ne.cfg.ErrorChatIDs {
+		ne.bot.Send(&tb.Chat{ID: cid}, msg)
 	}
+}
 
-	t, err := time.Parse("2006-01-02", cfg.Birthdate)
+func (ne *notifyExecutor) Run(success chan bool) (res bool) {
+	defer func() { success <- res }()
+
+	t, err := time.Parse("2006-01-02", ne.cfg.Birthdate)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -94,29 +109,31 @@ func handleConfig(cfg notifyConfig, success chan bool) (res bool) {
 
 	resp, err := client.R().
 		SetResult(&listResponse{}).
-		Get(fmt.Sprintf("appointments/findVaccinationCenterListFree/%s?stiko=%s&birthdate=%d", cfg.PLZ, cfg.STIKO, ms))
+		Get(fmt.Sprintf("appointments/findVaccinationCenterListFree/%s?stiko=%s&birthdate=%d", ne.cfg.PLZ, ne.cfg.STIKO, ms))
+	if !resp.IsSuccess() {
+		ne.errorOut(replaceText(errStatus+fmt.Sprintf("\nStatus: %d", resp.StatusCode())+"\n"+requestInfos, ne.cfg, nil))
+		return
+	}
+
 	result, ok := resp.Result().(*listResponse)
 	if !ok {
-		fmt.Println(replaceText(errReadAnswer, cfg, nil))
-		for _, cid := range cfg.ErrorChatIDs {
-			b.Send(&tb.Chat{ID: cid}, replaceText(errReadAnswer, cfg, nil))
-		}
+		ne.errorOut(replaceText(errReadAnswer, ne.cfg, nil))
 		return
 	}
 	re := regexp.MustCompile(captchaRegex)
 	if re.Match(resp.Body()) {
-		fmt.Println(replaceText(errCaptcha, cfg, nil))
-		for _, cid := range cfg.ErrorChatIDs {
-			b.Send(&tb.Chat{ID: cid}, replaceText(errCaptcha+"\nRequest: "+fmt.Sprint(resp.Request.Time)+"\nResponse: "+fmt.Sprint(resp.Time()), cfg, nil))
-		}
+		ne.errorOut(replaceText(errCaptcha, ne.cfg, nil))
 		return
+	}
+	if len(result.ResultList) == 0 {
+		ne.errorOut(replaceText(errResultLen, ne.cfg, nil))
 	} else {
-		fmt.Println(replaceText("got response list len: "+fmt.Sprint(len(result.ResultList))+" {Birthdate}", cfg, nil))
+		fmt.Println(replaceText("request successful: {Birthdate}", ne.cfg, nil))
 	}
 	for _, res := range result.ResultList {
 		if !res.OutOfStock {
-			for _, cid := range cfg.ChatIDs {
-				b.Send(&tb.Chat{ID: cid}, replaceText(foundText, cfg, &res))
+			for _, cid := range ne.cfg.ChatIDs {
+				ne.bot.Send(&tb.Chat{ID: cid}, replaceText(foundText, ne.cfg, &res))
 			}
 		}
 	}
@@ -126,11 +143,17 @@ func handleConfig(cfg notifyConfig, success chan bool) (res bool) {
 
 func main() {
 	var chans []chan bool
-	for i, c := range config {
-		chans = append(chans, make(chan bool))
-		go handleConfig(c, chans[i])
-	}
 	exit := 0
+	for i, c := range config {
+		exec, err := newExecutor(c)
+		if err != nil {
+			fmt.Println(err)
+			exit = 1
+			continue
+		}
+		chans = append(chans, make(chan bool))
+		go exec.Run(chans[i])
+	}
 	for _, ch := range chans {
 		if res := <-ch; !res {
 			exit = 1
