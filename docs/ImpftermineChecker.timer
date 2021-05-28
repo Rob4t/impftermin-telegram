@@ -2,7 +2,7 @@
 Description=Impfchecker Timer
 
 [Timer]
-OnCalendar=minutely
+OnCalendar=8..23:*:00
 Persistent=true
 Unit=ImpftermineChecker.service
 

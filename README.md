@@ -1,6 +1,11 @@
 # impftermin-telegram
 
-Das Skript benachrichtigt via Telegram wenn Impftermine im Impfportal Niedersachsen zur Verfügung stehen. Es kann auch parallel für eine handvoll Personen gesucht werden.
+Das Skript benachrichtigt via Telegram wenn Impftermine im Impfportal Niedersachsen zur Verfügung stehen sowie versucht diese automatisch zu buchen. Es kann auch parallel für eine handvoll Personen gesucht werden.
+
+## Voraussetzungen
+
+* pass
+* scheduler dienst (zb systemd timer)
 
 ## Installation (Beispiel Ubuntu+Systemd)
 
@@ -10,6 +15,7 @@ git clone https://github.com/Rob4t/impftermin-telegram.git
 cd impftermin-telegram
 
 # main.go editieren und die Configs eintragen die man möchte
+# auch die Konstanten "renewToken*" beachten.
 
 go install .
 
@@ -21,6 +27,21 @@ sudo systemctl enable ImpftermineChecker.service
 
 sudo systemctl enable ImpftermineChecker.timer
 
+```
+
+## Erster Start
+
+FÜr den systemd user (root) muss ein pass store initialisiert werden und ein Eintrag "Impfscript-Global" mit einem Inhalt wie folgt angelegt werden:
+
+```
+{"Key":"Impfscript-Global","Data":"[BASE64 JWT]","Label":"","Description":"","KeychainNotTrustApplication":false,"KeychainNotSynchronizable":false}
+```
+
+Anstelle des [BASE64 JWT] muss ein gültiger base64 enkodierter JWT eingetragen werden. Diesen kriegt man am leichtesten über die Funktion "Stornieren" im Impfportal. (Enwicklertools nutzen)
+
+Kurz darauf das Script starten:
+
+```
 sudo systemctl start ImpftermineChecker.service
 
 sudo systemctl start ImpftermineChecker.timer
