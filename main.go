@@ -17,7 +17,7 @@ import (
 )
 
 var config = []notifyConfig{
-	// {BotToken: "TOKEN", ChatIDs: []int64{123456}, ErrorChatIDs: []int64{123456}, PLZ: "12345", STIKO: "M", Birthdate: "1999-01-01"},
+	/*
 	{
 		BotToken:      "TOKEN",
 		ChatIDs:       []int64{-1234},
@@ -36,6 +36,7 @@ var config = []notifyConfig{
 		IndicationMed: true,
 		Email:         "email@example.com",
 	},
+	*/
 }
 
 const (
