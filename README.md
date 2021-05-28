@@ -31,7 +31,7 @@ sudo systemctl enable ImpftermineChecker.timer
 
 ## Erster Start
 
-FÜr den systemd user (root) muss ein pass store initialisiert werden und ein Eintrag "Impfscript-Global" mit einem Inhalt wie folgt angelegt werden:
+Für den systemd user (root) muss ein pass store initialisiert werden und ein Eintrag "Impfscript-Global" mit einem Inhalt wie folgt angelegt werden:
 
 ```
 {"Key":"Impfscript-Global","Data":"[BASE64 JWT]","Label":"","Description":"","KeychainNotTrustApplication":false,"KeychainNotSynchronizable":false}
