@@ -59,3 +59,13 @@ Ein Configeintrag (von dem mehrere eine Config bilden können) besteht aus folge
 | PLZ     | Die Postleitzahl für eure Suche     |
 | STIKO     | STIKO Indikation (M=Medizinisch, J=Beruflich)     |
 | Birthdate     | Euer Geburtsdatum im Format YYYY-MM-DD     |
+| City     | Stadt des Terminsuchenden     |
+| StreetName     | Straße des Terminsuchenden    |
+| StreetNumber     | Hausnummer des Terminsuchenden    |
+| FirstName     | Vorname des Terminsuchenden     |
+| LastName     | Nachname des Terminsuchenden     |
+| Gender     | Geschlecht (M/F/D)     |
+| Phone     | Eure Telefonnummer     |
+| Email     | Email Adresse an die ein erfolgreich gebuchter Termin gehen soll     |
+| IndicationJob     | true/false -> Berufliche Indikation     |
+| IndicationMed     | true/false -> Medizinische Indikation     |
