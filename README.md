@@ -4,7 +4,8 @@ Das Skript benachrichtigt via Telegram wenn Impftermine im Impfportal Niedersach
 
 ## Voraussetzungen
 
-* pass
+* go
+* pass (https://www.passwordstore.org/)
 * scheduler dienst (zb systemd timer)
 
 ## Installation (Beispiel Ubuntu+Systemd)
