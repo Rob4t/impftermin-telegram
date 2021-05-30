@@ -25,7 +25,6 @@ var config = []notifyConfig{
 		PLZ:           "31245",
 		STIKO:         "M",
 		Birthdate:     "1966-05-03",
-		BirthdateJS:   "1966-05-02T22:00:00.000Z",
 		City:          "Hannover",
 		FirstName:     "Max",
 		LastName:      "Mustermann",
@@ -72,7 +71,6 @@ type (
 		PLZ           string
 		STIKO         string
 		Birthdate     string
-		BirthdateJS   string
 		City          string
 		Email         string
 		FirstName     string
@@ -150,6 +148,16 @@ func replaceText(text string, cfg notifyConfig, res *availableResponse) string {
 	return r.Replace(text)
 }
 
+func birthdateToISO8601DateTime(date string) (formated string) {
+	tz, _ := time.LoadLocation("Local")
+	t, err := time.ParseInLocation("2006-01-02", date, tz)
+	if err != nil {
+		return
+	}
+	formated = t.UTC().Format("2006-01-02T15:04:05.000Z")
+	return
+}
+
 func (ne *notifyExecutor) errorOut(msg string) {
 	fmt.Println(msg)
 	for _, cid := range ne.cfg.ErrorChatIDs {
@@ -166,7 +174,7 @@ func (ne *notifyExecutor) BookAppointment() (err error) {
 				ne.secondAppointment,
 			},
 			AutomaticScheduling: 0,
-			Birthdate:           ne.cfg.BirthdateJS,
+			Birthdate:           birthdateToISO8601DateTime(ne.cfg.Birthdate),
 			CountryCode:         "DE",
 			City:                ne.cfg.City,
 			CustomerStatus:      1,
@@ -329,7 +337,7 @@ func (ne *notifyExecutor) RegisterCustomer() (err error) {
 			AgeIndication:       ne.cfg.AgeIndication,
 			Appointments:        []string{},
 			AutomaticScheduling: 0,
-			Birthdate:           ne.cfg.BirthdateJS,
+			Birthdate:           birthdateToISO8601DateTime(ne.cfg.Birthdate),
 			CountryCode:         "DE",
 			City:                ne.cfg.City,
 			CustomerStatus:      1,
