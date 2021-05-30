@@ -18,23 +18,23 @@ import (
 
 var config = []notifyConfig{
 	/*
-	{
-		BotToken:      "TOKEN",
-		ChatIDs:       []int64{-1234},
-		ErrorChatIDs:  []int64{-1234},
-		PLZ:           "31245",
-		STIKO:         "M",
-		Birthdate:     "1966-05-03",
-		City:          "Hannover",
-		FirstName:     "Max",
-		LastName:      "Mustermann",
-		Gender:        "M",
-		Phone:         "012345567",
-		StreetName:    "Testweg",
-		StreetNumber:  "1",
-		IndicationMed: true,
-		Email:         "email@example.com",
-	},
+		{
+			BotToken:      "TOKEN",
+			ChatIDs:       []int64{-1234},
+			ErrorChatIDs:  []int64{-1234},
+			PLZ:           "31245",
+			STIKO:         "M",
+			Birthdate:     "1966-05-03",
+			City:          "Hannover",
+			FirstName:     "Max",
+			LastName:      "Mustermann",
+			Gender:        "M",
+			Phone:         "012345567",
+			StreetName:    "Testweg",
+			StreetNumber:  "1",
+			IndicationMed: true,
+			Email:         "email@example.com",
+		},
 	*/
 }
 
@@ -58,6 +58,7 @@ const (
 	renewTokenErrChatID     = -1234
 	renewTokenChatID        = -1234
 
+	passDir         = "/root/.password-store"
 	passKey         = "Impfscript-Global"
 	passServiceName = "Impfscript"
 	diskvFolderName = "impfscript-data"
@@ -109,7 +110,7 @@ func newExecutor(cfg notifyConfig) (ne *notifyExecutor, err error) {
 			keyring.PassBackend,
 		},
 		ServiceName: passServiceName,
-		PassDir:     "/root/.password-store",
+		PassDir:     passDir,
 	})
 	val, err = ne.keyring.Get(passKey)
 	token = string(val.Data)
@@ -401,7 +402,7 @@ func RenewToken(success chan bool) (res bool) {
 			keyring.PassBackend,
 		},
 		ServiceName: passServiceName,
-		PassDir:     "/root/.password-store",
+		PassDir:     passDir,
 	})
 	if err != nil {
 		fmt.Println(err)
