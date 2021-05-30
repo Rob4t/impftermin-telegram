@@ -4,6 +4,8 @@
 
 Das Skript benachrichtigt via Telegram wenn Impftermine im Impfportal Niedersachsen zur Verfügung stehen sowie versucht diese automatisch zu buchen. Es kann auch parallel für eine handvoll Personen gesucht werden.
 
+__Achtung:__ Das Script ist nur etwas für flexible Menschen, da es den erstbesten Termin der frei wird bucht! Sobald einer gebucht wurde wird kein weiterer für die eingestellte Person gebucht.
+
 ## Voraussetzungen
 
 * go
