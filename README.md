@@ -1,3 +1,5 @@
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?hosted_button_id=3W8PWJKGS8Y8E)
+
 # impftermin-telegram
 
 Das Skript benachrichtigt via Telegram wenn Impftermine im Impfportal Niedersachsen zur Verfügung stehen sowie versucht diese automatisch zu buchen. Es kann auch parallel für eine handvoll Personen gesucht werden.
