@@ -34,17 +34,28 @@ sudo systemctl enable ImpftermineChecker.timer
 
 ```
 
+## Pass Konfiguration (Beispiel Ubuntu)
+
+Für den systemd user (root) muss ein pass store initialisiert werden und ein Eintrag "Impfscript-Global" mit dem JWT in bestimmter Syntax angelegt werden:
+
+```
+# in root eingeloggt sein (sudo -s wenn nötig)
+
+apt-get install pass
+
+# GPG Key erstellen. Als Username z.B. Impfscript nutzen, den Rest leer lassen. default key type (RSA and RSA) und 4096 bits auswählen, spielt aber keine Rolle
+gpg --full-generate-key
+
+pass init Impfscript
+
+# Eintrag anlegen mit folgendem Passwort Wert: {"Key":"Impfscript-Global","Data":"[BASE64 JWT]","Label":"","Description":"","KeychainNotTrustApplication":false,"KeychainNotSynchronizable":false}
+# Anstelle des [BASE64 JWT] muss ein gültiger base64 enkodierter JWT eingetragen werden (diesen kriegt man am leichtesten über die Funktion "Stornieren" im Impfportal. (Enwicklertools nutzen). Den vom Portal bezogenen JWT dann nochmal base64 enkodieren)
+pass insert Impfscript-Global
+```
+
 ## Erster Start
 
-Für den systemd user (root) muss ein pass store initialisiert werden und ein Eintrag "Impfscript-Global" mit einem Inhalt wie folgt angelegt werden:
-
-```
-{"Key":"Impfscript-Global","Data":"[BASE64 JWT]","Label":"","Description":"","KeychainNotTrustApplication":false,"KeychainNotSynchronizable":false}
-```
-
-Anstelle des [BASE64 JWT] muss ein gültiger base64 enkodierter JWT eingetragen werden. Diesen kriegt man am leichtesten über die Funktion "Stornieren" im Impfportal. (Enwicklertools nutzen)
-
-Kurz darauf das Script starten:
+Das Script starten:
 
 ```
 sudo systemctl start ImpftermineChecker.service
@@ -62,7 +73,7 @@ Ein Configeintrag (von dem mehrere eine Config bilden können) besteht aus folge
 | ChatIDs     | Die Telegram ChatIDs bei denen die Benachrichtigungen landen können. Das können UserIDs, GruppenIDs etc sein.     |
 | ErrorChatIDs     | Die Telegram ChatIDs bei denen die Benachrichtigungen über Fehler (zb Captcha) landen können. Das können UserIDs, GruppenIDs etc sein.     |
 | PLZ     | Die Postleitzahl für eure Suche     |
-| STIKO     | STIKO Indikation (M=Medizinisch, J=Beruflich)     |
+| STIKO     | STIKO Indikation (M=Medizinisch, J=Beruflich, leer lassen für keine Priorisierung)     |
 | Birthdate     | Euer Geburtsdatum im Format YYYY-MM-DD     |
 | City     | Stadt des Terminsuchenden     |
 | StreetName     | Straße des Terminsuchenden    |
